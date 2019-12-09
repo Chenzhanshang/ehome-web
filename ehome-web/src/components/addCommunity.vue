@@ -19,7 +19,7 @@
                 @change="selected">
                 </el-cascader>
             </el-form-item>
-        </el-form>  
+        </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="dialogFormVisible = false">取 消</el-button>
             <el-button type="primary" @click="addCommunity" :loading="isload">确 定</el-button>
