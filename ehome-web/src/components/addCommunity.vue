@@ -55,7 +55,6 @@ export default {
         },
         addCommunity(){
             this.isload = true
-            
             this.axios.post("/admin/addCommunity",this.form)
             .then((res)=>{
                 console.log(res)
