@@ -71,7 +71,7 @@
         prop="communityInfo"
         label="小区信息"
         width="180">
-      </el-table-column>
+      </el-table-column> 
     <el-table-column
         prop="region.fullName"
         label="所属街道">
