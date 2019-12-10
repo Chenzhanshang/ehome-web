@@ -4,6 +4,7 @@ import login from '../components/login'
 import home from '../components/home'
 import addCommunity from '../components/addCommunity'
 import communityInfo from '../components/communityInfo'
+import generateAdminAccount from '../user/generateAdminAccount'
 
 Vue.use(VueRouter)
 
@@ -31,6 +32,10 @@ const routes = [
         name:'communityInfo',
         path:'communityInfo',
         component:communityInfo
+      },
+      {
+        path:'generateAdminAccount',
+        component:generateAdminAccount
       }
     ]
   }
