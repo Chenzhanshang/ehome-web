@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import login from '../components/login'
 import home from '../components/home'
 import addCommunity from '../components/addCommunity'
+import communityInfo from '../components/communityInfo'
 
 Vue.use(VueRouter)
 
@@ -25,6 +26,11 @@ const routes = [
       {
         path:'addCommunity',
         component:addCommunity
+      },
+      {
+        name:'communityInfo',
+        path:'communityInfo',
+        component:communityInfo
       }
     ]
   }

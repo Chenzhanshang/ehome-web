@@ -55,7 +55,8 @@
     <!-- 表格 -->
     <el-table
       :data="showList"
-      style="width: 100%">
+      style="width: 100%"
+      height="530">
           <el-table-column
       type="index"
       label="序号"
@@ -77,13 +78,13 @@
       </el-table-column>
       <el-table-column
       align="right">
-      <template slot="header" >
+      <template slot="header" slot-scope="scope">
         <el-input
           v-model="search"
           size="mini"
           placeholder="输入关键字搜索"/>
       </template>
-      <template slot-scope="scope">
+      <template slot-scope="scope" >
         <el-button
           size="mini"
           @click="addHouse(scope.$index, scope.row)">添加楼栋</el-button>
@@ -94,7 +95,7 @@
           size="mini"
           type="warning"
           plain
-          @click="handleEdit(scope.$index, scope.row)">查看</el-button>
+          @click="selectCommunityInfo(scope.$index, scope.row)">查看</el-button>
         <el-button
           size="mini"
           type="warning"
@@ -118,7 +119,7 @@ export default {
     computed:{
         showList:function(){
             return this.communityList.filter((item)=>{
-                if(item.communityName.includes(this.search)||item.communityInfo.includes(this.search)||item.region.fullName.includes(this.search)){
+                if(item.communityName.includes(this.search)||item.communityInfo.includes(this.search)||(item.region!= null && item.region.fullName.includes(this.search))){
                     return item;
                 }
             })
@@ -151,6 +152,12 @@ export default {
         }
     },
     methods: {
+        selectCommunityInfo(index,row){
+            console.log(index,row)
+            sessionStorage.setItem('communityInfo',JSON.stringify(row))
+            this.$router.push({name:'communityInfo'})
+        },
+        //清空输入的房间信息
         clearRoomInfo(){
             this.room.roomName = ''
             this.room.house.houseId = ''
