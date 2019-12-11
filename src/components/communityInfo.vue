@@ -176,16 +176,21 @@ export default {
                 //修改本地数据
                   this.deleteLocalHouseData(row.houseId)
                   this.$message({
-                    type: 'info',
+                    type: 'success',
                     message: res.data.msg
                   });   
+              }else{
+                  this.$message({
+                    type: 'error',
+                    message: res.data.msg
+                  });
               }
           })
           .catch((res)=>{
             this.$message({
-                    type: 'error',
-                    message: "删除失败"
-                  });   
+              type: 'warning',
+              message: "请求删除楼栋失败"
+            });   
           })
         }).catch(() => {
           this.$message({
@@ -210,11 +215,11 @@ export default {
         }).then(() => {
           //如果被认证过
           if(row.owner != null){
-               this.$message({
-                    type: 'warning',
-                    message: "该房间已被认证无法删除"
-                  });
-                  return;
+            this.$message({
+                type: 'warning',
+                message: "该房间已被认证无法删除"
+              });
+              return;
           }
           this.axios.post('/admin/deleteRoom',{roomId:row.roomId})
           .then((res)=>{
@@ -222,16 +227,22 @@ export default {
                 //修改本地数据
                   this.deleteLocalRoomData(row.roomId)
                   this.$message({
-                    type: 'info',
+                    type: 'success',
+                    message: res.data.msg
+                  });   
+              }
+              else{
+                this.$message({
+                    type: 'error',
                     message: res.data.msg
                   });   
               }
           })
           .catch((res)=>{
             this.$message({
-                    type: 'error',
-                    message: "删除失败"
-                  });
+                type: 'error',
+                message: "请求删除房间失败"
+              });
           })
         }).catch(() => {
           this.$message({
@@ -260,7 +271,13 @@ export default {
                       //修改本地数据
                         this.updateLocalRoomData(row.roomId,value)
                         this.$message({
-                          type: 'info',
+                          type: 'success',
+                          message: res.data.msg
+                        });   
+                    }
+                    else{
+                      this.$message({
+                          type: 'error',
                           message: res.data.msg
                         });   
                     }
@@ -268,7 +285,7 @@ export default {
                 .catch((res)=>{
                   this.$message({
                           type: 'error',
-                          message: "修改失败"
+                          message: "请求修改房间信息失败"
                         });   
                 })
               }).catch(() => {
@@ -298,7 +315,13 @@ export default {
                       //修改本地数据
                         this.updateLocalHouseData(row.houseId,value)
                         this.$message({
-                          type: 'info',
+                          type: 'success',
+                          message: res.data.msg
+                        });   
+                    }
+                    else{
+                      this.$message({
+                          type: 'error',
                           message: res.data.msg
                         });   
                     }
@@ -306,7 +329,7 @@ export default {
                 .catch((res)=>{
                   this.$message({
                           type: 'error',
-                          message: "修改失败"
+                          message: "请求修改楼栋信息失败"
                         });   
                 })
               }).catch(() => {
@@ -326,10 +349,14 @@ export default {
               console.log(res)
               if(res.data.status==0){
                 this.roomList = res.data.data.roomList
+                this.$message({
+                    type: 'success',
+                    message: res.data.msg
+                });
               }
               else{
                 this.$message({
-                    type: 'success',
+                    type: 'error',
                     message: res.data.msg
                 });
               }
@@ -337,8 +364,8 @@ export default {
             })
             .catch((res)=>{
               this.$message({
-                    type: 'success',
-                    message: res.data.msg
+                    type: 'warning',
+                    message: "请求获取房间列表失败"
                 });
             })
         },
@@ -349,10 +376,14 @@ export default {
               console.log(res)
               if(res.data.status==0){
                 this.houseList = res.data.data.houseList
+                this.$message({
+                    type: 'success',
+                    message: res.data.msg
+                });
               }
               else{
                 this.$message({
-                    type: 'success',
+                    type: 'error',
                     message: res.data.msg
                 });
               }
@@ -360,8 +391,8 @@ export default {
             })
             .catch((res)=>{
               this.$message({
-                    type: 'success',
-                    message: res.data.msg
+                    type: 'warning',
+                    message: "请求获取楼栋列表失败"
                 });
             })
         }

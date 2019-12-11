@@ -224,19 +224,24 @@ export default {
                     if(res.data.status == 0){
                         //显示消息
                         this.$message({
-                            type: 'info',
+                            type: 'success',
                             message: res.data.msg
                         });
                         this.loadCommunityList()
+                    }else{
+                        //显示消息
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        });
                     }
-
                     this.updateCommunityLoad = false
                     this.updateCommunityFormVisible = false
             })
             .catch((res)=>{
-                  this.$message({
-                    type: 'error',
-                    message: "修改失败"
+                this.$message({
+                    type: 'warning',
+                    message: "请求修改小区信息失败"
                 });  
                  this.updateCommunityLoad = false 
             })
@@ -279,15 +284,21 @@ export default {
                 //修改本地数据
                   this.deleteLocalCommunityData(row.communityId)
                   this.$message({
-                    type: 'info',
+                    type: 'success',
+                    message: res.data.msg
+                  });   
+              }else{
+                  this.$message({
+                    type: 'error',
                     message: res.data.msg
                   });   
               }
+
           })
           .catch((res)=>{
             this.$message({
-                    type: 'error',
-                    message: "删除失败"
+                    type: 'warning',
+                    message: "请求删除小区失败"
                   });   
           })
         }).catch(() => {
@@ -315,32 +326,51 @@ export default {
             this.axios.post('/admin/addRoom',this.room)
             .then((res)=>{
                 console.log(res)
-                this.$message({
-                    type: 'success',
-                    message: res.data.msg
-                });
+                if(res.data.status == 0){
+                    this.$message({
+                        type: 'success',
+                        message: res.data.msg
+                    });
+                }else{
+                    this.$message({
+                        type: 'error',
+                        message: res.data.msg
+                    });
+                }
+                
                 this.addRoomIsload = false
                 this.addRoomFormVisible = false
                 this.clearRoomInfo()
             })
             .catch((res)=>{
                 this.$message({
-                    type: 'error',
-                    message: res.data.msg
+                    type: 'warning',
+                    message: "请求添加房间失败"
                 }); 
             })
         },
         //添加房间
         addRoom(index,row){
-            //获取楼栋
+            //获取楼栋信息
             this.axios.get('/admin/houseList/' + row.communityId)
             .then((res)=>{
-                this.houseList = res.data.data.houseList
-                //显示添加表单
-                this.addRoomFormVisible = true
+                if(res.data.status == 0){
+                    this.houseList = res.data.data.houseList
+                    //显示添加表单
+                    this.addRoomFormVisible = true
+                }else{
+                    this.$message({
+                        type: 'error',
+                        message: res.data.msg
+                    }); 
+                }
+                
             })
             .catch((res)=>{
-                console.log("1111");
+                this.$message({
+                        type: 'warning',
+                        message: "请求获取楼栋列表失败"
+                    }); 
             })
         },
         //添加楼栋
@@ -351,14 +381,24 @@ export default {
         }).then(({ value }) => {
                 this.axios.post("/admin/addHouse",{houseName:value,community:{communityId:row.communityId}})
                 .then((res)=>{
-                    console.log(res)
-                    this.$message({
-                        type: 'success',
-                        message: res.data.msg
-                    });     
+                    if(res.data.status == 0){
+                        this.$message({
+                            type: 'success',
+                            message: res.data.msg
+                        }); 
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        }); 
+                    }
+                        
                 })
                 .catch((res)=>{
-                    console.log(res)
+                    this.$message({
+                        type: 'warning',
+                        message: "请求添加楼栋失败"
+                    }); 
                 })
         }).catch(() => {
           this.$message({
@@ -387,21 +427,28 @@ export default {
             this.addCommunityIsload = true
             this.axios.post("/admin/addCommunity",this.form)
             .then((res)=>{
-                console.log(res)
+                if(res.data.status == 0){
+                    this.communityList.push(res.data.data.dbData)
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    });
+                }
+                else{
+                    this.$message({
+                        type:'error',
+                        message:res.data.msg
+                    });
+                }
                 this.addCommunityIsload = false
                 this.addCommunityFormVisible = false
-                if(res.data.data.dbData != null){
-                    this.communityList.push(res.data.data.dbData)
-                }
-                this.$message({
-                    message:res.data.msg
-                });
+                
             })
             .catch((res)=>{
-                console.log(res)
-                this.addCommunityIsload = false
+
                 this.$message({
-                    message:res.data.msg
+                    type:'warning',
+                    message:"请求添加小区失败"
                 });
             })
         },
@@ -409,18 +456,25 @@ export default {
         loadRegion(){
             this.axios.get("/admin/regionList")
             .then((res)=>{
-                console.log(res);
                 if(res.data.status == 0){
                     this.options = res.data.data.regionList
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    });
                 }
                 else{
                     this.$message({
+                        type:'error',
                         message:res.data.msg
                     });
                 }
             })
             .catch((res)=>{
-                console.log(res);
+                this.$message({
+                        type:'warning',
+                        message:"请求加载地区信息失败"
+                    });
             })
         },
         //加载小区列表
@@ -430,15 +484,23 @@ export default {
                 console.log(res);
                 if(res.data.status == 0){
                     this.communityList = res.data.data.communityList
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    });
                 }
                 else{
                     this.$message({
+                        type:'error',
                         message:res.data.msg
                     });
                 }
             })
             .catch((res)=>{
-                console.log(res);
+                this.$message({
+                        type:'warning',
+                        message:"请求加载小区列表失败"
+                    });
             })
         }
 
