@@ -1,20 +1,34 @@
 <template>
     <el-container >
         <el-header class="right">
+            <el-button type="text" icon="el-icon-info" @click="attentionDialogVisible = true">注意事项</el-button>
             <el-button  type="success" @click="addCommunityFormVisible = true">添加小区</el-button>
         </el-header>
         
         <el-main>
+            <el-dialog
+            title="注意事项"
+            :visible.sync="attentionDialogVisible"
+            width="50%">
+            <p>1、在此页面您可以查询系统中已存在的小区列表以及他们的信息</p>
+            <p>2、在此页面您可以添加一个新的小区并设置它的基本信息</p>
+            <p>3、您可以点击修改按钮来修改对应的小区的信息</p>
+            <p>4、您可以点击删除按钮来删除一个已存在的小区（注意：若小区中<span class="text-color-red">存在楼栋</span>则无法删除该小区。）</p>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="text" @click="displayAttention">不在显示</el-button>
+                <el-button type="primary" @click="attentionDialogVisible = false">确 定</el-button>
+            </span>
+            </el-dialog>
         <!-- 添加小区的输入对话框 -->
         <el-dialog title="输入小区信息" :visible.sync="addCommunityFormVisible">
-        <el-form :model="form">
-            <el-form-item label="小区名" :label-width="formLabelWidth">
+        <el-form :model="form" :rules="commRules" ref="comm">
+            <el-form-item label="小区名" :label-width="formLabelWidth" prop="communityName">
             <el-input v-model="form.communityName" autocomplete="off"></el-input>
             </el-form-item>
-             <el-form-item label="小区信息" :label-width="formLabelWidth">
+             <el-form-item label="小区信息" :label-width="formLabelWidth" prop="communityInfo">
             <el-input v-model="form.communityInfo" autocomplete="off"></el-input>
             </el-form-item>
-            <el-form-item label="所属地区" :label-width="formLabelWidth">
+            <el-form-item label="所属地区" :label-width="formLabelWidth" prop="region.regionId">
                 <el-cascader
                 placeholder="试试搜索"
                 :options="options"
@@ -26,16 +40,16 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
             <el-button @click="clearCommunityInfo">取 消</el-button>
-            <el-button type="primary" @click="addCommunity" :loading="addCommunityIsload">确 定</el-button>
+            <el-button type="primary" @click="addCommunity('comm')" :loading="addCommunityIsload">确 定</el-button>
         </div>
         </el-dialog>
-
-        <el-dialog title="收货地址" :visible.sync="addRoomFormVisible">
-            <el-form :model="room">
-                <el-form-item label="房间名" :label-width="formLabelWidth">
+        <!-- 添加房间的输入框 -->
+        <el-dialog title="输入房间信息"  :visible.sync="addRoomFormVisible">
+            <el-form :model="room" :rules="roomRules" ref="roomFrom">
+                <el-form-item label="房间名" :label-width="formLabelWidth" prop="roomName" >
                 <el-input v-model="room.roomName" autocomplete="off"></el-input>
                 </el-form-item>
-                <el-form-item label="所属楼栋" :label-width="formLabelWidth">
+                <el-form-item label="所属楼栋" :label-width="formLabelWidth" prop="house.houseId" >
                 <el-select v-model="room.house.houseId" clearable placeholder="请选择">
                     <el-option
                     v-for="item in houseList"
@@ -48,7 +62,32 @@
             </el-form>
             <div slot="footer" class="dialog-footer">
                 <el-button @click="clearRoomInfo">取 消</el-button>
-                <el-button type="primary" @click="toAddRoom" :loading="addRoomIsload">确 定</el-button>
+                <el-button type="primary" @click="toAddRoom('roomFrom')" :loading="addRoomIsload">确 定</el-button>
+            </div>
+        </el-dialog>
+        <!-- 修改小区信息 -->
+        <el-dialog title="修改小区信息" :visible.sync="updateCommunityFormVisible">
+            <el-form :model="preUpdateCommuntiy" :rules="commRules" ref="upComm">
+                <el-form-item label="小区名" :label-width="formLabelWidth" prop="communityName">
+                    <el-input v-model="preUpdateCommuntiy.communityName" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="小区信息" :label-width="formLabelWidth" prop="communityInfo">
+                    <el-input v-model="preUpdateCommuntiy.communityInfo" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="所属地区" :label-width="formLabelWidth" prop="region.regionId">
+                <el-cascader
+                    placeholder="试试搜索"
+                    :options="options"
+                    v-model="preUpdateCommuntiy.region.regionId"
+                    filterable
+                    :clearable=true
+                    @change="setpreUpdateCommuntiyRegion">
+                    </el-cascader>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="clearUpdateCommunityFormVisible">取 消</el-button>
+                <el-button type="primary" @click="updateCommunityCommit('upComm')" :loading="updateCommunityLoad">确 定</el-button>
             </div>
         </el-dialog>
 
@@ -93,19 +132,19 @@
           @click="addRoom(scope.$index, scope.row)">添加房间</el-button>
           <el-button
           size="mini"
-          type="warning"
+          type="primary"
           plain
-          @click="selectCommunityInfo(scope.$index, scope.row)">查看</el-button>
+          @click="selectCommunityInfo(scope.$index, scope.row)">管理</el-button>
         <el-button
           size="mini"
           type="warning"
           plain
-          @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          @click="updateCommunity(scope.$index, scope.row)">修改</el-button>
         <el-button
           size="mini"
           type="danger"
           plain
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          @click="deleteCommunity(scope.$index, scope.row)">删除</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -127,15 +166,31 @@ export default {
     },
     data() {
         return {
+            attentionDialogVisible:false,
+            updateCommunityFormVisible:false,
+            updateCommunityLoad:false,
             addCommunityIsload:false,
             addRoomIsload:false,
             addCommunityFormVisible: false,
             addRoomFormVisible:false,
+            commRules:{
+                communityName:[{required: true, message: '社区名不能为空', trigger: 'blur'}],
+                communityInfo:[{required: true, message: '社区信息不能为空', trigger: 'blur'}],
+                region:{
+                    regionId:[{required: true, message: '请选择地区', trigger: 'blur'}]  
+                }
+            },
             form: {
                 communityName:'',
                 communityInfo:'',
                 region:{
                     regionId:'',
+                }
+            },
+            roomRules:{
+                roomName:[{required: true, message: '房间名不能为空', trigger: 'blur'}],
+                house:{
+                    houseId:[{required: true, message: '请选择楼栋', trigger: 'blur'}]
                 }
             },
             room:{
@@ -148,10 +203,133 @@ export default {
             options:[],
             communityList:[],
             search:'',
-            houseList:[]
+            houseList:[],
+            preUpdateCommuntiy:{
+                communityId:'',
+                communityName:'',
+                communityInfo:'',
+                region:{
+                    regionId:'',
+                }
+            }
         }
     },
     methods: {
+        //不在显示注意事项
+        displayAttention(){
+            localStorage.setItem("showAttention",JSON.stringify(false))
+            this.attentionDialogVisible = false
+        },
+        setpreUpdateCommuntiyRegion(e){
+            console.log(e)
+            if(e.length==4){
+                this.preUpdateCommuntiy.region.regionId = e[3]
+            }
+            else{
+                this.preUpdateCommuntiy.region.regionId = null
+            }
+        },
+        updateCommunityCommit(formName){
+            this.$refs[formName].validate((valid) => {
+            if (valid) {
+                this.updateCommunityLoad = true
+                console.log(this.preUpdateCommuntiy)
+                this.axios.post('admin/updateCommunity',this.preUpdateCommuntiy)
+                .then((res)=>{
+                        if(res.data.status == 0){
+                            //显示消息
+                            this.$message({
+                                type: 'success',
+                                message: res.data.msg
+                            });
+                            this.loadCommunityList()
+                        }else{
+                            //显示消息
+                            this.$message({
+                                type: 'error',
+                                message: res.data.msg
+                            });
+                        }
+                        this.updateCommunityLoad = false
+                        this.updateCommunityFormVisible = false
+                })
+                .catch((res)=>{
+                    this.$message({
+                        type: 'warning',
+                        message: "请求修改小区信息失败"
+                    });  
+                    this.updateCommunityLoad = false 
+                })
+                
+            } else {
+                console.log('error submit!!');
+                return false;
+            }
+            });
+            
+        },
+        clearUpdateCommunityFormVisible(){
+            this.preUpdateCommuntiy.communityId = ''
+            this.preUpdateCommuntiy.communityName = ''
+            this.preUpdateCommuntiy.communityInfo = ''
+            this.preUpdateCommuntiy.region.regionId = ''
+            this.updateCommunityFormVisible = false
+
+        },
+        updateCommunity(index,row){
+            console.log(row)
+            this.updateCommunityFormVisible = true
+            this.preUpdateCommuntiy.communityId = row.communityId
+            this.preUpdateCommuntiy.communityName = row.communityName
+            this.preUpdateCommuntiy.communityInfo = row.communityInfo
+            this.preUpdateCommuntiy.region.regionId = row.region.regionId
+
+            console.log(this.preUpdateCommuntiy)
+        },
+        deleteLocalCommunityData(communityId){
+            this.communityList.forEach((item,index)=>{
+            if(item.communityId == communityId){
+                this.communityList.splice(index,1)
+                return;
+            }
+            })
+        },
+        deleteCommunity(index,row){
+            this.$confirm('此操作将删除该楼栋, 是否继续?注意若楼栋中存在房间则无法删除楼栋!', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.axios.post('/admin/deleteCommunity',{communityId:row.communityId})
+          .then((res)=>{
+              if(res.data.status==0){
+                //修改本地数据
+                  this.deleteLocalCommunityData(row.communityId)
+                  this.$message({
+                    type: 'success',
+                    message: res.data.msg
+                  });   
+              }else{
+                  this.$message({
+                    type: 'error',
+                    message: res.data.msg
+                  });   
+              }
+
+          })
+          .catch((res)=>{
+            this.$message({
+                    type: 'warning',
+                    message: "请求删除小区失败"
+                  });   
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+        },
         selectCommunityInfo(index,row){
             console.log(index,row)
             sessionStorage.setItem('communityInfo',JSON.stringify(row))
@@ -164,56 +342,97 @@ export default {
             this.addRoomFormVisible = false
 
         },
-        toAddRoom(){
-            this.addRoomIsload = true
-            console.log(this.room)
-            this.axios.post('/admin/addRoom',this.room)
-            .then((res)=>{
-                console.log(res)
-                this.$message({
-                    type: 'success',
-                    message: res.data.msg
-                });
-                this.addRoomIsload = false
-                this.addRoomFormVisible = false
-                this.clearRoomInfo()
-            })
-            .catch((res)=>{
-                this.$message({
-                    type: 'error',
-                    message: res.data.msg
-                }); 
-            })
+        toAddRoom(formName){
+            this.$refs[formName].validate((valid) => {
+            if (valid) {
+                this.addRoomIsload = true
+                console.log(this.room)
+                this.axios.post('/admin/addRoom',this.room)
+                .then((res)=>{
+                    console.log(res)
+                    if(res.data.status == 0){
+                        this.$message({
+                            type: 'success',
+                            message: res.data.msg
+                        });
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        });
+                    }
+                    
+                    this.addRoomIsload = false
+                    this.addRoomFormVisible = false
+                    this.clearRoomInfo()
+                })
+                .catch((res)=>{
+                    this.$message({
+                        type: 'warning',
+                        message: "请求添加房间失败"
+                    }); 
+                })
+
+            } else {
+                console.log('error submit!!');
+                return false;
+            }
+            });
+                    
+            
         },
         //添加房间
         addRoom(index,row){
-            //获取楼栋
+            //获取楼栋信息
             this.axios.get('/admin/houseList/' + row.communityId)
             .then((res)=>{
-                this.houseList = res.data.data.houseList
-                //显示添加表单
-                this.addRoomFormVisible = true
+                if(res.data.status == 0){
+                    this.houseList = res.data.data.houseList
+                    //显示添加表单
+                    this.addRoomFormVisible = true
+                }else{
+                    this.$message({
+                        type: 'error',
+                        message: res.data.msg
+                    }); 
+                }
+                
             })
             .catch((res)=>{
-                console.log("1111");
+                this.$message({
+                        type: 'warning',
+                        message: "请求获取楼栋列表失败"
+                    }); 
             })
         },
         //添加楼栋
         addHouse(index,row){
         this.$prompt('请输入楼栋', '提示', {
           confirmButtonText: '确定',
-          cancelButtonText: '取消'
+          cancelButtonText: '取消',
+          inputPattern:/\S/,
+          inputErrorMessage: '楼栋名不能为空'
         }).then(({ value }) => {
                 this.axios.post("/admin/addHouse",{houseName:value,community:{communityId:row.communityId}})
                 .then((res)=>{
-                    console.log(res)
-                    this.$message({
-                        type: 'success',
-                        message: res.data.msg
-                    });     
+                    if(res.data.status == 0){
+                        this.$message({
+                            type: 'success',
+                            message: res.data.msg
+                        }); 
+                    }else{
+                        this.$message({
+                            type: 'error',
+                            message: res.data.msg
+                        }); 
+                    }
+                        
                 })
                 .catch((res)=>{
-                    console.log(res)
+                    this.$message({
+                        type: 'warning',
+                        message: "请求添加楼栋失败"
+                    }); 
                 })
         }).catch(() => {
           this.$message({
@@ -226,7 +445,9 @@ export default {
         //过滤地区
         selected(e){
             console.log(e)
+            if(e.length==4){
             this.form.region.regionId = e[3]
+            }
             console.log(this.form.region.regionId)
         },
         clearCommunityInfo(){
@@ -236,44 +457,69 @@ export default {
             this.addCommunityFormVisible = false
         },
         //添加小区
-        addCommunity(){
-            this.addCommunityIsload = true
-            this.axios.post("/admin/addCommunity",this.form)
-            .then((res)=>{
-                console.log(res)
-                this.addCommunityIsload = false
-                this.addCommunityFormVisible = false
-                if(res.data.data.dbData != null){
-                    this.communityList.push(res.data.data.dbData)
-                }
-                this.$message({
-                    message:res.data.msg
-                });
-            })
-            .catch((res)=>{
-                console.log(res)
-                this.addCommunityIsload = false
-                this.$message({
-                    message:res.data.msg
-                });
-            })
+        addCommunity(formName){
+            this.$refs[formName].validate((valid) => {
+            if (valid) {
+                    this.addCommunityIsload = true
+                    this.axios.post("/admin/addCommunity",this.form)
+                    .then((res)=>{
+                        if(res.data.status == 0){
+                            this.communityList.push(res.data.data.dbData)
+                            this.$message({
+                                type:'success',
+                                message:res.data.msg
+                            });
+                        }
+                        else{
+                            this.$message({
+                                type:'error',
+                                message:res.data.msg
+                            });
+                        }
+                        this.addCommunityIsload = false
+                        this.addCommunityFormVisible = false
+                        
+                    })
+                    .catch((res)=>{
+
+                        this.$message({
+                            type:'warning',
+                            message:"请求添加小区失败"
+                        });
+                    })
+
+
+            } else {
+                console.log('error submit!!');
+                return false;
+            }
+            });
+
+            
         },
         //加载地区信息
         loadRegion(){
             this.axios.get("/admin/regionList")
             .then((res)=>{
-                console.log(res);
                 if(res.data.status == 0){
                     this.options = res.data.data.regionList
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    });
                 }
                 else{
                     this.$message({
+                        type:'error',
                         message:res.data.msg
                     });
                 }
             })
             .catch((res)=>{
-                console.log(res);
+                this.$message({
+                        type:'warning',
+                        message:"请求加载地区信息失败"
+                    });
             })
         },
         //加载小区列表
@@ -283,15 +529,23 @@ export default {
                 console.log(res);
                 if(res.data.status == 0){
                     this.communityList = res.data.data.communityList
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    });
                 }
                 else{
                     this.$message({
+                        type:'error',
                         message:res.data.msg
                     });
                 }
             })
             .catch((res)=>{
-                console.log(res);
+                this.$message({
+                        type:'warning',
+                        message:"请求加载小区列表失败"
+                    });
             })
         }
 
@@ -299,6 +553,7 @@ export default {
     created() {
         this.loadRegion()
         this.loadCommunityList()
+        this.attentionDialogVisible = JSON.parse(localStorage.getItem("showAttention"))
     }, 
 }
 </script>
@@ -307,7 +562,10 @@ export default {
     .right{
         display: flex;
         flex-direction: row;
-        align-items: flex-end;
+        align-items: center;
         justify-content:flex-end;
+    }
+    .text-color-red{
+        color: red;
     }
 </style>

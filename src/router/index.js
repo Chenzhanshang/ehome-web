@@ -6,6 +6,7 @@ import addCommunity from '../components/addCommunity'
 import communityInfo from '../components/communityInfo'
 import generateAdminAccount from '../user/generateAdminAccount'
 import userManage from '../user/userManage'
+import examineList from '../components/examineList'
 
 Vue.use(VueRouter)
 
@@ -41,6 +42,10 @@ const routes = [
       {
         path:'userManage',
         component:userManage
+       },
+      {
+        path:'examineList',
+        component:examineList
       }
     ]
   }

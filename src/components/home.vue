@@ -5,7 +5,7 @@
             <el-menu :router=true :default-active="activeIndex"  class="el-menu-demo" mode="horizontal" @select="handleSelect">
             <el-submenu index="1">
                 <template slot="title">审批工作</template>
-                <el-menu-item index="1-1">审批作业</el-menu-item>
+                <el-menu-item index="/home/examineList">审批作业</el-menu-item>
                 <el-menu-item index="1-2">历史审批</el-menu-item>
             </el-submenu>
             
