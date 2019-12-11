@@ -1,7 +1,7 @@
 <template>
     <el-container>
         <el-button type="success" @click="dialogFormVisible = true">生成管理账号</el-button>
-        <el-button type="success" @click="dialogFormVisible = true">管理账号</el-button>
+        <el-button type="success" @click="toUserManage">管理账号</el-button>
     
 
 
@@ -10,7 +10,7 @@
             <el-form-item label="账号类型">
                 <el-radio-group v-model="form.role" @change="selectRole">
                     <el-radio label="subdistrictOffice" border >街道办</el-radio>
-                    <el-radio label="houseManagement"  border >房产管理局</el-radio>
+                    <el-radio label="houseManagement"  border >房管局</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="所属地区" >
@@ -107,16 +107,9 @@ export default {
         //生成账号方法
         generateAccount(){
             this.isload = true
-            //设置提交
-            let config = {
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    }
-                };
             this.axios.post("/generate/generateAccount",
             {accountType:this.form.role,regionId:this.form.region.regionId})
             .then((res)=>{
-                console.log(res)
                 this.isload = false
 
                  //设置表格展示的数据信息
@@ -132,6 +125,7 @@ export default {
 
                 this.flag = true
                 this.$message({
+                    type: 'success',
                     message:res.data.msg
                 });
 
@@ -141,12 +135,17 @@ export default {
             .catch((res)=>{
                 console.log(res)
                 this.isload = false
+                type: 'error',
                 this.$message({
                     message:res.data.msg
                 });
             })
 
             
+        },
+
+        toUserManage(){
+            this.$router.push({path:'/home/userManage'})
         }
         
     },
@@ -172,7 +171,3 @@ export default {
     
 }
 </script>
-
-<style>
-
-</style>
