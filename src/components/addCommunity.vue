@@ -1,10 +1,24 @@
 <template>
     <el-container >
         <el-header class="right">
+            <el-button type="text" icon="el-icon-info" @click="attentionDialogVisible = true">注意事项</el-button>
             <el-button  type="success" @click="addCommunityFormVisible = true">添加小区</el-button>
         </el-header>
         
         <el-main>
+            <el-dialog
+            title="注意事项"
+            :visible.sync="attentionDialogVisible"
+            width="50%">
+            <p>1、在此页面您可以查询系统中已存在的小区列表以及他们的信息</p>
+            <p>2、在此页面您可以添加一个新的小区并设置它的基本信息</p>
+            <p>3、您可以点击修改按钮来修改对应的小区的信息</p>
+            <p>4、您可以点击删除按钮来删除一个已存在的小区（注意：若小区中<span class="text-color-red">存在楼栋</span>则无法删除该小区。）</p>
+            <span slot="footer" class="dialog-footer">
+                <el-button type="text" @click="displayAttention">不在显示</el-button>
+                <el-button type="primary" @click="attentionDialogVisible = false">确 定</el-button>
+            </span>
+            </el-dialog>
         <!-- 添加小区的输入对话框 -->
         <el-dialog title="输入小区信息" :visible.sync="addCommunityFormVisible">
         <el-form :model="form">
@@ -29,8 +43,8 @@
             <el-button type="primary" @click="addCommunity" :loading="addCommunityIsload">确 定</el-button>
         </div>
         </el-dialog>
-
-        <el-dialog title="收货地址" :visible.sync="addRoomFormVisible">
+        <!-- 添加房间的输入框 -->
+        <el-dialog title="输入房间信息" :visible.sync="addRoomFormVisible">
             <el-form :model="room">
                 <el-form-item label="房间名" :label-width="formLabelWidth">
                 <el-input v-model="room.roomName" autocomplete="off"></el-input>
@@ -49,6 +63,31 @@
             <div slot="footer" class="dialog-footer">
                 <el-button @click="clearRoomInfo">取 消</el-button>
                 <el-button type="primary" @click="toAddRoom" :loading="addRoomIsload">确 定</el-button>
+            </div>
+        </el-dialog>
+        <!-- 修改小区信息 -->
+        <el-dialog title="修改小区信息" :visible.sync="updateCommunityFormVisible">
+            <el-form :model="preUpdateCommuntiy">
+                <el-form-item label="小区名" :label-width="formLabelWidth">
+                    <el-input v-model="preUpdateCommuntiy.communityName" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="小区信息" :label-width="formLabelWidth">
+                    <el-input v-model="preUpdateCommuntiy.communityInfo" autocomplete="off"></el-input>
+                </el-form-item>
+                <el-form-item label="所属地区" :label-width="formLabelWidth">
+                <el-cascader
+                    placeholder="试试搜索"
+                    :options="options"
+                    v-model="preUpdateCommuntiy.region.regionId"
+                    filterable
+                    :clearable=true
+                    @change="setpreUpdateCommuntiyRegion">
+                    </el-cascader>
+                </el-form-item>
+            </el-form>
+            <div slot="footer" class="dialog-footer">
+                <el-button @click="clearUpdateCommunityFormVisible">取 消</el-button>
+                <el-button type="primary" @click="updateCommunityCommit" :loading="updateCommunityLoad">确 定</el-button>
             </div>
         </el-dialog>
 
@@ -100,12 +139,12 @@
           size="mini"
           type="warning"
           plain
-          @click="handleEdit(scope.$index, scope.row)">修改</el-button>
+          @click="updateCommunity(scope.$index, scope.row)">修改</el-button>
         <el-button
           size="mini"
           type="danger"
           plain
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          @click="deleteCommunity(scope.$index, scope.row)">删除</el-button>
       </template>
       </el-table-column>
     </el-table>
@@ -127,6 +166,9 @@ export default {
     },
     data() {
         return {
+            attentionDialogVisible:false,
+            updateCommunityFormVisible:false,
+            updateCommunityLoad:false,
             addCommunityIsload:false,
             addRoomIsload:false,
             addCommunityFormVisible: false,
@@ -148,10 +190,113 @@ export default {
             options:[],
             communityList:[],
             search:'',
-            houseList:[]
+            houseList:[],
+            preUpdateCommuntiy:{
+                communityId:'',
+                communityName:'',
+                communityInfo:'',
+                region:{
+                    regionId:'',
+                }
+            }
         }
     },
     methods: {
+        //不在显示注意事项
+        displayAttention(){
+            localStorage.setItem("showAttention",JSON.stringify(false))
+            this.attentionDialogVisible = false
+        },
+        setpreUpdateCommuntiyRegion(e){
+            console.log(e)
+            if(e.length==4){
+                this.preUpdateCommuntiy.region.regionId = e[3]
+            }
+            else{
+                this.preUpdateCommuntiy.region.regionId = null
+            }
+        },
+        updateCommunityCommit(){
+            this.updateCommunityLoad = true
+            console.log(this.preUpdateCommuntiy)
+            this.axios.post('admin/updateCommunity',this.preUpdateCommuntiy)
+            .then((res)=>{
+                    if(res.data.status == 0){
+                        //显示消息
+                        this.$message({
+                            type: 'info',
+                            message: res.data.msg
+                        });
+                        this.loadCommunityList()
+                    }
+
+                    this.updateCommunityLoad = false
+                    this.updateCommunityFormVisible = false
+            })
+            .catch((res)=>{
+                  this.$message({
+                    type: 'error',
+                    message: "修改失败"
+                });  
+                 this.updateCommunityLoad = false 
+            })
+        },
+        clearUpdateCommunityFormVisible(){
+            this.preUpdateCommuntiy.communityId = ''
+            this.preUpdateCommuntiy.communityName = ''
+            this.preUpdateCommuntiy.communityInfo = ''
+            this.preUpdateCommuntiy.region.regionId = ''
+            this.updateCommunityFormVisible = false
+
+        },
+        updateCommunity(index,row){
+            console.log(row)
+            this.updateCommunityFormVisible = true
+            this.preUpdateCommuntiy.communityId = row.communityId
+            this.preUpdateCommuntiy.communityName = row.communityName
+            this.preUpdateCommuntiy.communityInfo = row.communityInfo
+            this.preUpdateCommuntiy.region.regionId = row.region.regionId
+
+            console.log(this.preUpdateCommuntiy)
+        },
+        deleteLocalCommunityData(communityId){
+            this.communityList.forEach((item,index)=>{
+            if(item.communityId == communityId){
+                this.communityList.splice(index,1)
+                return;
+            }
+            })
+        },
+        deleteCommunity(index,row){
+            this.$confirm('此操作将删除该楼栋, 是否继续?注意若楼栋中存在房间则无法删除楼栋!', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.axios.post('/admin/deleteCommunity',{communityId:row.communityId})
+          .then((res)=>{
+              if(res.data.status==0){
+                //修改本地数据
+                  this.deleteLocalCommunityData(row.communityId)
+                  this.$message({
+                    type: 'info',
+                    message: res.data.msg
+                  });   
+              }
+          })
+          .catch((res)=>{
+            this.$message({
+                    type: 'error',
+                    message: "删除失败"
+                  });   
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+        },
         selectCommunityInfo(index,row){
             console.log(index,row)
             sessionStorage.setItem('communityInfo',JSON.stringify(row))
@@ -226,7 +371,9 @@ export default {
         //过滤地区
         selected(e){
             console.log(e)
+            if(e.length==4){
             this.form.region.regionId = e[3]
+            }
             console.log(this.form.region.regionId)
         },
         clearCommunityInfo(){
@@ -299,6 +446,7 @@ export default {
     created() {
         this.loadRegion()
         this.loadCommunityList()
+        this.attentionDialogVisible = JSON.parse(localStorage.getItem("showAttention"))
     }, 
 }
 </script>
@@ -307,7 +455,10 @@ export default {
     .right{
         display: flex;
         flex-direction: row;
-        align-items: flex-end;
+        align-items: center;
         justify-content:flex-end;
+    }
+    .text-color-red{
+        color: red;
     }
 </style>
