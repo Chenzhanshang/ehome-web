@@ -21,8 +21,8 @@ new Vue({
   router,
   render: h => h(App),
   created() {
-    if(!localStorage.getItem('showAttention')){
-      localStorage.setItem("showAttention",JSON.stringify(true))
+    if(!sessionStorage.getItem('showAttention')){
+      sessionStorage.setItem("showAttention",JSON.stringify(true))
     }
     
     

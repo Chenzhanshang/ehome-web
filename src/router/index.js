@@ -7,6 +7,7 @@ import communityInfo from '../components/communityInfo'
 import generateAdminAccount from '../user/generateAdminAccount'
 import userManage from '../user/userManage'
 import examineList from '../components/examineList'
+import examinePage from '../components/examinePage'
 
 Vue.use(VueRouter)
 
@@ -24,6 +25,7 @@ const routes = [
   {
     name:'home',
     path:'/home',
+    redirect:'/home/examineList',
     component:home,
     children:[
       {
@@ -46,6 +48,10 @@ const routes = [
       {
         path:'examineList',
         component:examineList
+      },
+      {
+        path:'examinePage',
+        component:examinePage
       }
     ]
   }
