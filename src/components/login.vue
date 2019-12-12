@@ -54,14 +54,14 @@ export default {
                             console.log(res)
                             //跳转页面
                             if(res.data.data.region != null){
-                                localStorage.setItem("region",res.data.data.region); 
+                                sessionStorage.setItem("region",res.data.data.region); 
                             }
                             if(res.data.data.roles != null){
-                                localStorage.setItem("roles",JSON.stringify(res.data.data.roles)); 
+                                sessionStorage.setItem("roles",JSON.stringify(res.data.data.roles)); 
                                 //console.log(res.data.data.roles[0].roleName)
                             }
                             if(res.data.data.adminModify != null){
-                                localStorage.setItem("adminModify",JSON.stringify(res.data.data.adminModify)); 
+                                sessionStorage.setItem("adminModify",JSON.stringify(res.data.data.adminModify)); 
                                 //console.log(res.data.data.roles[0].roleName)
                             }
                             this.$router.push({name:'home'})
