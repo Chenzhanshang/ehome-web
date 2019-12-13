@@ -264,7 +264,7 @@ export default {
             this.$prompt('请输新的房间名', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
-                inputPattern: /\s/,
+                inputPattern:/\S/,
                 inputErrorMessage: '房间名不能为空'
               }).then(({ value }) => {
                 this.axios.post('/admin/updateRoom',{roomId:row.roomId,roomName:value})
@@ -310,7 +310,7 @@ export default {
             this.$prompt('请输新的楼栋名', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
-                inputPattern: /\s/,
+                inputPattern:/\S/,
                 inputErrorMessage: '楼栋名不能为空'
               }).then(({ value }) => {
                 this.axios.post('/admin/updateHouse',{houseId:row.houseId,houseName:value})
