@@ -1,7 +1,7 @@
 <template>
   <el-container>
       <el-header>
-          {{info.region.fullName}}
+          {{info.region.fullName}}:{{info.communityName}}
       </el-header>
       <main >
       <el-tabs v-model="activeName" @tab-click="handleClick" :tab-position="'left'" style="height: 500px;" >
@@ -118,6 +118,48 @@
           </el-table-column>
           </el-table>
         </el-tab-pane>
+        <el-tab-pane label="录入候选人" name=" four">
+
+          <el-table
+          :data="candidateList"
+          style="width: 100%">
+          <el-table-column
+            label="序号"
+            type="index">
+          </el-table-column>
+          <el-table-column
+            label="候选人姓名"
+            prop="owner.ownerName">
+          </el-table-column>
+          <el-table-column
+            label="所得票数"
+            prop="candidatePoll">
+          </el-table-column>
+          <el-table-column
+            label="创建时间"
+            prop="candidateCreateTime">
+          </el-table-column>
+          <el-table-column
+            align="right">
+            <template slot="header" slot-scope="scope">
+              <el-button type="primary" @click="addCandidateDialogVisible = true">添加候选人</el-button>
+            </template>
+            <template slot-scope="scope">
+              <el-button
+                size="mini"
+                type="danger"
+                @click="handleDelete(scope.$index, scope.row)" plain="">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-dialog title="添加候选人"  :visible.sync="addCandidateDialogVisible">
+          <el-transfer v-model="value" :data="transferList"></el-transfer>
+          <div slot="footer" class="dialog-footer">
+            <el-button @click="addCandidateDialogVisible = false">取 消</el-button>
+            <el-button type="primary" @click="addCandidate">确 定</el-button>
+          </div>
+        </el-dialog>
+        </el-tab-pane>
     </el-tabs>
   </main>
   </el-container>
@@ -139,20 +181,74 @@ export default {
           return item
         }
       })
+    },
+    transferList:function(){
+      const data = [];
+        for(let i = 0;i<this.ownerList.length;i++){
+            data.push({
+              key:this.ownerList[i].ownerId,
+              label:this.ownerList[i].ownerName,
+              disabled:this.atlist(this.ownerList[i].ownerId)
+            })
+        }
+        console.log(data)
+        return data;
     }
   },
   data() {
         return {
+            value: [],
+            addCandidateDialogVisible:false,
             activeNames: ['1','2','3'],
             search:'',
             activeName: 'first',
             info:'',
             houseList:[],
             roomList:[],
+            ownerList:[],
+            candidateList:[],
             value:''
         }
     },
     methods: {
+      getOwnerList(communityId){
+        this.axios.get("/admin/ownerList/"+communityId)
+        .then((res)=>{
+          console.log(res)
+          if(res.data.status == 0){
+            this.ownerList = res.data.data.ownerList;
+            this.$message({
+              type:"success",
+              message:res.data.msg
+            })
+          }
+          else{
+            this.$message({
+              type:"error",
+              message:res.data.msg
+            })
+          }
+            
+        })
+        .catch((res)=>{
+          this.$message({
+              type:"warning",
+              message:"请求业主数据失败"
+          })
+        })
+      },
+      atlist(ownerId){
+          this.candidateList.forEach((item)=>{
+            if(ownerId === item.ownerId){
+              return true
+            }
+          })
+          return false
+      },
+      addCandidate(){
+        console.log(this.value)
+        this.addCandidateDialogVisible = false
+      },
       handleChange(val) {
         console.log(val);
       },
@@ -399,6 +495,33 @@ export default {
                     message: "请求获取楼栋列表失败"
                 });
             })
+        },
+        getCandidateList(communityId){
+          this.axios.get("/admin/candidateList/"+communityId)
+          .then((res)=>{
+            if(res.data.status == 0){
+              console.log(res)
+              this.candidateList = res.data.data.candidateList
+
+              this.$message({
+                type:'success',
+                message:res.data.msg
+              })
+            }
+            else{
+              this.$message({
+                type:'error',
+                message:res.data.msg
+              })
+            }
+          })
+          .catch((res)=>{
+            this.$message({
+              type:'warning',
+              message:'请求候选人列表失败'
+            })
+          })
+
         }
     },
     created() {
@@ -406,6 +529,8 @@ export default {
         this.info = JSON.parse(sessionStorage.getItem('communityInfo'))
         this.getHouse(this.info.communityId)
         this.getRoom(this.info.communityId)
+        this.getCandidateList(this.info.communityId)
+        this.getOwnerList(this.info.communityId)
     },
 }
 </script>

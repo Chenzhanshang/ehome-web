@@ -58,7 +58,7 @@
                 :data="otherList"
                 height="600px"
                 stripe
-                style="width: 100%">
+                style="width: 100%">    
                 <el-table-column
                 type="index"
                 label="序号"
