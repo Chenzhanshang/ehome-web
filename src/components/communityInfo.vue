@@ -138,22 +138,33 @@
           <el-table-column
             label="创建时间"
             prop="candidateCreateTime">
+            <template slot-scope="scope">
+              {{scope.row.candidateCreateTime | dateFormart}}
+            </template>
           </el-table-column>
           <el-table-column
             align="right">
             <template slot="header" slot-scope="scope">
-              <el-button type="primary" @click="addCandidateDialogVisible = true">添加候选人</el-button>
+              <el-button type="primary" @click="getunCandidateOwnerList">添加候选人</el-button>
             </template>
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 type="danger"
-                @click="handleDelete(scope.$index, scope.row)" plain="">删除</el-button>
+                @click="deleteCandidate(scope.$index, scope.row)" plain="">删除</el-button>
             </template>
           </el-table-column>
         </el-table>
         <el-dialog title="添加候选人"  :visible.sync="addCandidateDialogVisible">
-          <el-transfer v-model="value" :data="transferList"></el-transfer>
+          <span>选择添加候选人：可以选择多个</span>
+          <el-select v-model="value1" multiple placeholder="请选择" >
+            <el-option
+              v-for="item in ownerList"
+              :key="item.ownerId"
+              :label="item.ownerName"
+              :value="item.ownerId">
+            </el-option>
+          </el-select>
           <div slot="footer" class="dialog-footer">
             <el-button @click="addCandidateDialogVisible = false">取 消</el-button>
             <el-button type="primary" @click="addCandidate">确 定</el-button>
@@ -181,72 +192,119 @@ export default {
           return item
         }
       })
-    },
-    transferList:function(){
-      const data = [];
-        for(let i = 0;i<this.ownerList.length;i++){
-            data.push({
-              key:this.ownerList[i].ownerId,
-              label:this.ownerList[i].ownerName,
-              disabled:this.atlist(this.ownerList[i].ownerId)
-            })
-        }
-        console.log(data)
-        return data;
     }
   },
   data() {
         return {
-            value: [],
-            addCandidateDialogVisible:false,
-            activeNames: ['1','2','3'],
-            search:'',
-            activeName: 'first',
-            info:'',
-            houseList:[],
-            roomList:[],
-            ownerList:[],
-            candidateList:[],
-            value:''
+          value1: [],
+          addCandidateDialogVisible:false,
+          activeNames: ['1','2','3','4'],
+          search:'',
+          activeName: 'first',
+          info:'',
+          houseList:[],
+          roomList:[],
+          ownerList:[],
+          candidateList:[],
+          value:''
         }
     },
     methods: {
-      getOwnerList(communityId){
-        this.axios.get("/admin/ownerList/"+communityId)
+      deleteCandidate(index,row){
+        this.$confirm('此操作将删除该候选人,若该候选人拥票数则无法删除, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.axios.get("/admin/deleteCandidate/"+row.candidateId)
+          .then((res)=>{
+            if(res.data.status == 0){
+              this.candidateList.forEach((item,index)=>{
+                  if(item.candidateId === row.candidateId){
+                    this.candidateList.splice(index,1)
+                    return;
+                  }
+              })
+
+               this.$message({
+                  type: 'success',
+                  message: res.data.msg
+                });
+            }
+            else{
+              this.$message({
+                  type: 'error',
+                  message: res.data.msg
+                });
+            }
+          })
+          .catch((res)=>{
+                this.$message({
+                  type: 'warning',
+                  message: '请求删除失败!'
+                });
+          })
+
+
+         
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+
+        console.log(row)
+      },
+      getunCandidateOwnerList(){
+        this.addCandidateDialogVisible = true
+        this.axios.get('/admin/unCandidateOwnerList/'+this.info.communityId)
         .then((res)=>{
-          console.log(res)
+            // console.log(res)
+            if(res.data.status == 0){
+              this.ownerList = res.data.data.ownerList
+              console.log(this.ownerList)
+            }
+            else{
+              this.ownerList = []
+            }
+        })
+        .catch((res)=>{
+              this.ownerList = []
+        })
+      },
+      addCandidate(){
+        console.log(this.value1)
+        //添加候选人
+        this.axios.post('/admin/addCandidate',{ownerId:this.value1,communityId:this.info.communityId})
+        .then((res)=>{
+
           if(res.data.status == 0){
-            this.ownerList = res.data.data.ownerList;
+            res.data.data.candidateList.forEach((item)=>{
+              this.candidateList.push(item)
+            })
+
+
             this.$message({
-              type:"success",
+              type:'success',
               message:res.data.msg
             })
           }
           else{
             this.$message({
-              type:"error",
+              type:'error',
               message:res.data.msg
             })
           }
-            
         })
         .catch((res)=>{
           this.$message({
-              type:"warning",
-              message:"请求业主数据失败"
-          })
+              type:'warning',
+              message:"请求添加候选人失败"
+            })
         })
-      },
-      atlist(ownerId){
-          this.candidateList.forEach((item)=>{
-            if(ownerId === item.ownerId){
-              return true
-            }
-          })
-          return false
-      },
-      addCandidate(){
-        console.log(this.value)
+
+
         this.addCandidateDialogVisible = false
       },
       handleChange(val) {
@@ -530,7 +588,6 @@ export default {
         this.getHouse(this.info.communityId)
         this.getRoom(this.info.communityId)
         this.getCandidateList(this.info.communityId)
-        this.getOwnerList(this.info.communityId)
     },
 }
 </script>
