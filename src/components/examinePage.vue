@@ -32,7 +32,30 @@
                 </div>
             </el-card>
       </el-main>
-      <el-aside width="450px">Aside</el-aside>
+
+
+      <el-aside width="450px" style="margin-top:40px">
+        <el-form ref="form" :model="form" label-width="80px">
+            <el-form-item label="审批人" style="margin-top:40px">
+                <el-input v-model="form.adminName"></el-input>
+            </el-form-item>
+
+            <el-form-item label="审批结果" style="margin-top:60px; text-align:center">
+                <el-radio-group v-model="form.auditState">
+                    <el-radio label=1 >通过申请</el-radio>
+                    <el-radio label=0 >拒绝申请</el-radio>
+                </el-radio-group>
+            </el-form-item>
+            <el-form-item label="审批意见" style="margin-top:60px">
+                <el-input type="textarea" v-model="form.auditInfo"></el-input>
+            </el-form-item>
+            <el-form-item style="margin-top:60px; text-align:center">
+                <el-button type="primary" @click="openSubmitWindow()">提交</el-button>
+            </el-form-item>
+        </el-form>
+      </el-aside>
+
+
   </el-container>
 </template>
 
@@ -64,8 +87,18 @@ export default {
                     ownerIdNumber:'',
                     ownerName:''
                 },
-                files:[]
+                files:[],
+
+
+               
+
             },
+            form: {
+                adminName: '',
+                auditState: '',
+                auditInfo: '',
+
+                }
         }
     },
     methods: {
@@ -102,6 +135,42 @@ export default {
                 console.log(res)
             })
 
+        },
+
+        onSubmit(){
+            console.log(this.form)
+            this.axios.post("/audit/dispose",{
+                adminName: this.form.adminName,
+                auditState: this.form.auditState,
+                auditInfo: this.form.auditInfo,
+                applyId: this.applyId
+            }).then((res)=>{
+                this.$message({
+                type: 'success',
+                message:res.data.msg
+                });
+            })
+            .catch((res)=>{
+                this.$message({
+                    type: 'eroor',
+                    message:res.data.msg
+                })   
+            })
+        },
+
+        //提交处理对话框
+        openSubmitWindow() {
+            this.$confirm('处理该申请？该操作不可逆, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.onSubmit()
+            this.$router.push({path:'/home/examineList'})
+
+          }).catch(() => {  
+
+          })
         }
     },
     created() {
