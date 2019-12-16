@@ -1,6 +1,6 @@
 <template>
-    <el-container>
-    
+    <el-container direction="vertical">
+    <el-main>
     <el-dialog title="设置账号信息" :visible.sync="dialogFormVisible" width="40%">
       <el-form ref="form" :model="form" label-width="80px">
         <el-form-item label="账号" >
@@ -31,11 +31,11 @@
       </el-form>
     </el-dialog>
 
-    <!-- 管理员信息表格 -->
+    <!-- 管理员账号信息表格 -->
     <el-table
-      :data="showList"
+      :data="showList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       style="width: 100%"
-      height="530">
+      height="460">
       
       <el-table-column
       type="index"
@@ -85,8 +85,26 @@
             @click="openDeleteWindow(scope.row)">删除</el-button>
         </template>
       </el-table-column>
+      
     </el-table>
 
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 15, 20]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="adminList.length"
+      prev-text="上一页"
+      next-text="下一页"
+      style="
+        text-align:center;
+        letter-spacing:4px
+      "
+    >
+    </el-pagination>
+    </el-main>
     </el-container>
 
 </template>
@@ -105,6 +123,10 @@ export default {
     data(){
         return{
           dialogFormVisible: false,
+          //当前页
+          currentPage: 1,
+          //每页条数
+          pageSize: 5,
           adminList: [],
           search:'',
           adminId: '',
@@ -113,6 +135,7 @@ export default {
           options:[],
           //修改的表单
           form: {
+            
             adminAccount: '',
             adminPassword: '',
             adminType: [],
@@ -238,6 +261,17 @@ export default {
         //选择地区监听方法
         selected(e){
             this.form.region.regionId = e[3]
+        },
+
+        //监听页数改变
+        handleSizeChange: function(size){
+          this.pageSize = size
+
+        },
+
+        //监听当前页码
+        handleCurrentChange: function(currentPage){
+            this.currentPage = currentPage
         },
     },
 
