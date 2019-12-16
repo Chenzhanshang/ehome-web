@@ -37,12 +37,15 @@ const routes = [
       },
       {
         path:'generateAdminAccount',
-        component:generateAdminAccount
+        component:generateAdminAccount,
+        children: [
+          {
+            path:'userManage',
+            component:userManage
+           },
+        ]
       },
-      {
-        path:'userManage',
-        component:userManage
-       },
+      
       {
         path:'examineList',
         component:examineList

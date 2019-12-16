@@ -1,7 +1,9 @@
 <template>
-    <el-container>
-        <el-button type="success" @click="dialogFormVisible = true">生成管理账号</el-button>
-        <el-button type="success" @click="toUserManage">管理账号</el-button>
+    <el-container direction="vertical">
+        <div align="center">
+            <el-button type="success" @click="dialogFormVisible = true" style="width:150px;" plain>生成管理账号</el-button>
+        </div>
+        <router-view></router-view>
     
 
 
@@ -145,13 +147,14 @@ export default {
         },
 
         toUserManage(){
-            this.$router.push({path:'/home/userManage'})
+            this.$router.push({path:'/home/generateAdminAccount/userManage'})
         }
         
     },
 
     //页面加载调用方法
     created() {
+        this.toUserManage()
         this.axios.get("/admin/regionList")
         .then((res)=>{
             console.log(res);
