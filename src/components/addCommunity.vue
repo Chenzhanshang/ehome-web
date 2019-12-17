@@ -93,7 +93,7 @@
 
     <!-- 表格 -->
     <el-table
-      :data="showList"
+      :data="showList.slice((currentPage-1)*pageSize,currentPage*pageSize)"
       style="width: 100%"
       height="530">
           <el-table-column
@@ -148,6 +148,22 @@
       </template>
       </el-table-column>
     </el-table>
+    <el-pagination
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      :current-page="currentPage"
+      :page-sizes="[5, 10, 15, 20]"
+      :page-size="pageSize"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="showList.length"
+      prev-text="上一页"
+      next-text="下一页"
+      style="
+        text-align:center;
+        letter-spacing:4px
+      "
+    >
+    </el-pagination>
 </el-main>
     </el-container>
 
@@ -166,6 +182,10 @@ export default {
     },
     data() {
         return {
+                //当前页
+            currentPage: 1,
+            //每页条数
+            pageSize: 10,
             attentionDialogVisible:false,
             updateCommunityFormVisible:false,
             updateCommunityLoad:false,
@@ -215,6 +235,16 @@ export default {
         }
     },
     methods: {
+         //监听页数改变
+        handleSizeChange: function(size){
+          this.pageSize = size
+
+        },
+
+        //监听当前页码
+        handleCurrentChange: function(currentPage){
+            this.currentPage = currentPage
+        },
         //不在显示注意事项
         displayAttention(){
             localStorage.setItem("showAttention",JSON.stringify(false))
@@ -296,39 +326,39 @@ export default {
         },
         deleteCommunity(index,row){
             this.$confirm('此操作将删除该楼栋, 是否继续?注意若楼栋中存在房间则无法删除楼栋!', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.axios.post('/admin/deleteCommunity',{communityId:row.communityId})
-          .then((res)=>{
-              if(res.data.status==0){
-                //修改本地数据
-                  this.deleteLocalCommunityData(row.communityId)
-                  this.$message({
-                    type: 'success',
-                    message: res.data.msg
-                  });   
-              }else{
-                  this.$message({
-                    type: 'error',
-                    message: res.data.msg
-                  });   
-              }
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+            }).then(() => {
+            this.axios.post('/admin/deleteCommunity',{communityId:row.communityId})
+            .then((res)=>{
+                if(res.data.status==0){
+                    //修改本地数据
+                    this.deleteLocalCommunityData(row.communityId)
+                    this.$message({
+                        type: 'success',
+                        message: res.data.msg
+                    });   
+                }else{
+                    this.$message({
+                        type: 'error',
+                        message: res.data.msg
+                    });   
+                }
 
-          })
-          .catch((res)=>{
+            })
+            .catch((res)=>{
+                this.$message({
+                        type: 'warning',
+                        message: "请求删除小区失败"
+                    });   
+            })
+            }).catch(() => {
             this.$message({
-                    type: 'warning',
-                    message: "请求删除小区失败"
-                  });   
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });          
-        });
+                type: 'info',
+                message: '已取消删除'
+            });          
+            });
         },
         selectCommunityInfo(index,row){
             console.log(index,row)
@@ -407,40 +437,40 @@ export default {
         },
         //添加楼栋
         addHouse(index,row){
-        this.$prompt('请输入楼栋', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          inputPattern:/\S/,
-          inputErrorMessage: '楼栋名不能为空'
-        }).then(({ value }) => {
-                this.axios.post("/admin/addHouse",{houseName:value,community:{communityId:row.communityId}})
-                .then((res)=>{
-                    if(res.data.status == 0){
+            this.$prompt('请输入楼栋', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputPattern:/\S/,
+            inputErrorMessage: '楼栋名不能为空'
+            }).then(({ value }) => {
+                    this.axios.post("/admin/addHouse",{houseName:value,community:{communityId:row.communityId}})
+                    .then((res)=>{
+                        if(res.data.status == 0){
+                            this.$message({
+                                type: 'success',
+                                message: res.data.msg
+                            }); 
+                        }else{
+                            this.$message({
+                                type: 'error',
+                                message: res.data.msg
+                            }); 
+                        }
+                            
+                    })
+                    .catch((res)=>{
                         this.$message({
-                            type: 'success',
-                            message: res.data.msg
+                            type: 'warning',
+                            message: "请求添加楼栋失败"
                         }); 
-                    }else{
-                        this.$message({
-                            type: 'error',
-                            message: res.data.msg
-                        }); 
-                    }
-                        
-                })
-                .catch((res)=>{
-                    this.$message({
-                        type: 'warning',
-                        message: "请求添加楼栋失败"
-                    }); 
-                })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '取消输入'
-          });       
-        });
-        console.log(index, row);
+                    })
+            }).catch(() => {
+            this.$message({
+                type: 'info',
+                message: '取消输入'
+            });       
+            });
+            console.log(index, row);
         },
         //过滤地区
         selected(e){

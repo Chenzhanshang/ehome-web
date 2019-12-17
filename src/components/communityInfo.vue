@@ -9,7 +9,7 @@
             <el-collapse v-model="activeNames" @change="handleChange">
               <el-collapse-item title="功能介绍" name="1">
                 <div>您可以在此页面操作小区的楼栋和房间结构</div>
-                <div>包括：查询小区的楼栋、查询小区的房间、修改楼栋名称、修改房间名称、删除楼栋、删除房间</div>
+                <div>包括：查询小区的楼栋、查询小区的房间、修改楼栋名称、修改房间名称、删除楼栋、删除房间、录入业委会候选人</div>
               </el-collapse-item>
               <el-collapse-item title="关于楼栋的操作看这" name="2">
                 <div>搜索：在表格的右上角可以按照关键字进行搜索（只要楼栋名称包含关键字则能进行检索，无需输入完整楼栋名称）</div>
@@ -20,6 +20,10 @@
                 <div>搜索：在表格的右上角可以选择下拉菜单来按照楼栋查看房间</div>
                 <div>修改：点击修改按钮您可以修改房间信息（只能修改房间名称）</div>
                 <div>删除：点击删除按钮您可以删除该房间（注意：若该房间处于<span class="text-color-red">业主认证阶段</span>或<span class="text-color-red">业主已认证</span>则无法删除）</div>
+              </el-collapse-item>
+              <el-collapse-item title="录入业委会候选人的操作看这" name="4">
+                <div>添加候选人：您可以点击添加候选人，只有<span class="text-color-red">认证完成</span>的业主才会显示，您可以一次添加多个候选人</div>
+                <div>删除：点击删除按钮您可以删除该候选人（注意：若该候选人拥有<span class="text-color-red">票数</span>则无法删除）</div>
               </el-collapse-item>
             </el-collapse>
         </el-tab-pane>

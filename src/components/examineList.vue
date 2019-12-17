@@ -31,8 +31,10 @@
                 label="房间">
                 </el-table-column>
                 <el-table-column
-                prop="room.roomName"
                 label="申请时间">
+                 <template  slot-scope="scope">
+                    {{scope.row.createTime==null?new Date():scope.row.createTime | dateFormart}}
+                </template>
                 </el-table-column>
                 <el-table-column
                 align="right" >
@@ -73,8 +75,10 @@
                 label="小区名">
                 </el-table-column>
                 <el-table-column
-                prop="community.communityName"
                 label="申请时间">
+                <template  slot-scope="scope">
+                    {{scope.row.createTime==null?new Date():scope.row.createTime | dateFormart}}
+                </template>
                 </el-table-column>
                 <el-table-column
                 align="right">
