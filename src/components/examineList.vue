@@ -89,7 +89,7 @@
                     size="mini"
                     type="primary"
                     plain
-                    @click="handle(scope.$index, scope.row)">处理</el-button>
+                    @click="handleOther(scope.$index, scope.row)">处理</el-button>
                 </template>
                 </el-table-column>
             </el-table>
@@ -131,6 +131,12 @@ export default {
             //将要处理的对象放入缓存
             sessionStorage.setItem('waitHandleApplyId',JSON.stringify(row.applyId))
             this.$router.push({path:'/home/examinePage'})
+        },
+        //处理的对象
+        handleOther(index,row){
+            //将要处理的对象放入缓存
+            sessionStorage.setItem('waitHandleApplyId',JSON.stringify(row.applyId))
+            this.$router.push({path:'/home/otherPage'})
         },
         handleClick(tab, event) {
         console.log(tab, event);
