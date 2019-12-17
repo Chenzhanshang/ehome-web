@@ -8,6 +8,7 @@ import generateAdminAccount from '../user/generateAdminAccount'
 import userManage from '../user/userManage'
 import examineList from '../components/examineList'
 import examinePage from '../components/examinePage'
+import otherPage from '../components/otherPage'
 
 Vue.use(VueRouter)
 
@@ -55,6 +56,10 @@ const routes = [
       {
         path:'examinePage',
         component:examinePage
+      },
+      {
+        path:'otherPage',
+        component:otherPage
       }
     ]
   }
