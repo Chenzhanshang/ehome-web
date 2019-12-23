@@ -75,7 +75,6 @@ export default {
 
 
                 }).catch(() => {
-                    this.$router.push({name:'/'})
                 });
         }
     },
