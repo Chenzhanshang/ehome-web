@@ -108,14 +108,14 @@ export default {
     computed:{
         authenticationList:function(){
             return this.dataList.filter((item)=>{
-                if(item.room != null && item.community.communityName.includes(this.search1)){
+                if(item.flow.flowId == 1 && item.community.communityName.includes(this.search1)){
                     return item
                 }
             })
         },
         otherList:function(){
             return this.dataList.filter((item)=>{
-                if((item.room == null || item.house == null) && item.community.communityName.includes(this.search2) ){
+                if(item.flow.flowId == 2 && item.community.communityName.includes(this.search2) ){
                     return item
                 }
             })
