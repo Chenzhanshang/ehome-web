@@ -264,7 +264,7 @@ export default {
         this.addCandidateDialogVisible = true
         this.axios.get('/admin/unCandidateOwnerList/'+this.info.communityId)
         .then((res)=>{
-            // console.log(res)
+             console.log(res)
             if(res.data.status == 0){
               this.ownerList = res.data.data.ownerList
               console.log(this.ownerList)
