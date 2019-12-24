@@ -11,8 +11,7 @@
         <el-form :model="form">
             <el-form-item label="账号类型">
                 <el-radio-group v-model="form.role" @change="selectRole">
-                    <el-radio label="subdistrictOffice" border >街道办</el-radio>
-                    <el-radio label="houseManagement"  border >房管局</el-radio>
+                    <el-radio v-for="role in roleList" :key="role.roleId" :label="role.roleId" border>{{role.roleName}}</el-radio>
                 </el-radio-group>
             </el-form-item>
             <el-form-item label="所属地区" >
@@ -88,7 +87,9 @@ export default {
                 
             },
             //地区数据集合
-            options:[]
+            options:[],
+            //角色类型集合
+            roleList: []
         }
     },
     methods: {
@@ -110,18 +111,23 @@ export default {
         generateAccount(){
             this.isload = true
             this.axios.post("/generate/generateAccount",
-            {accountType:this.form.role,regionId:this.form.region.regionId})
+            {roleId:this.form.role,regionId:this.form.region.regionId})
             .then((res)=>{
                 this.isload = false
 
                  //设置表格展示的数据信息
                 this.tableData[0].account = res.data.data.admin.adminAccount
-                this.tableData[0].password = res.data.data.admin.adminPassword
-                if(this.form.role == "subdistrictOffice"){
-                    this.tableData[0].type = "街道办"
-                }
-                else if(this.form.role == "houseManagement"){
-                    this.tableData[0].type = "房产管理局"
+                this.tableData[0].password = '123456'
+                try{
+                    this.roleList.forEach(item=>{
+                        if(item.roleId === this.form.role){
+                            this.tableData[0].type = item.roleName
+                            //已找到对应数据，抛异常跳出循环
+                            throw new Error("已找到公告对应数据")
+                        }
+                    })  
+                 }
+                catch{
                 }
                 this.tableData[0].addressId = this.form.region.regionId
 
@@ -155,6 +161,17 @@ export default {
     //页面加载调用方法
     created() {
         this.toUserManage()
+
+         //加载所有账号类型，不包含平台成员
+        this.axios.get("/admin/getAllRole")
+        .then((res)=>{
+            console.log(res)
+            this.roleList = res.data.data.roles
+        })
+        .catch((res)=>{
+
+        })
+
         this.axios.get("/admin/regionList")
         .then((res)=>{
             console.log(res);
