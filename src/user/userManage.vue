@@ -11,8 +11,7 @@
         </el-form-item>
         <el-form-item label="类型">
           <el-select v-model="form.adminType" placeholder="请选择账号类型">
-            <el-option label="房管局" value="houseManagement"></el-option>
-            <el-option label="街道办" value="subdistrictOffice"></el-option>
+            <el-option v-for="role in roleList" :key="role.roleId" :label="role.roleName" :value="role.roleId"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属地区" >
@@ -133,6 +132,8 @@ export default {
           dialogVisible: false,
           //地区数据集合
           options:[],
+          //角色列表
+          roleList: [],
           //修改的表单
           form: {
             
@@ -229,9 +230,10 @@ export default {
         onSubmit() {
           this.axios.post("/admin/updateAdmin",{
             adminId: this.adminId,
+            adminAccount: this.form.adminAccount,
             adminPassword: this.form.adminPassword,
             region: {regionId:this.form.region.regionId},
-            roles: [{roleName:this.form.adminType}]
+            roles: [{roleId:this.form.adminType}]
           })
           .then((res)=>{
             this.$message({
@@ -276,22 +278,33 @@ export default {
     },
 
     created(){
-        this.loadAdminList()
-        //页面加载调用方法
-        this.axios.get("/admin/regionList")
-        .then((res)=>{
-            if(res.data.status == 0){
-                this.options = res.data.data.regionList
-            }
-            else{
-                this.$message({
-                    message:res.data.msg
-                });
-            } 
-        })
-        .catch((res)=>{
-            console.log(res);
-        })
+      this.loadAdminList()
+
+      //加载所有账号类型，不包含平台成员
+      this.axios.get("/admin/getAllRole")
+      .then((res)=>{
+        console.log(res)
+        this.roleList = res.data.data.roles
+      })
+      .catch((res)=>{
+
+      })
+
+      //页面加载调用方法
+      this.axios.get("/admin/regionList")
+      .then((res)=>{
+        if(res.data.status == 0){
+            this.options = res.data.data.regionList
+        }
+        else{
+            this.$message({
+                message:res.data.msg
+            });
+        } 
+      })
+      .catch((res)=>{
+          console.log(res);
+      })
     },
 }
 </script>
