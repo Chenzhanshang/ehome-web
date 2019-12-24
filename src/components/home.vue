@@ -6,7 +6,7 @@
             <el-submenu index="1">
                 <template slot="title">审批工作</template>
                 <el-menu-item index="/home/examineList">审批作业</el-menu-item>
-                <el-menu-item index="1-2">历史审批</el-menu-item>
+                <el-menu-item index="/home/historyExamineList">历史审批</el-menu-item>
             </el-submenu>
             
             <el-submenu v-if="show" index="2">

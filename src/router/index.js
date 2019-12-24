@@ -9,6 +9,8 @@ import userManage from '../user/userManage'
 import examineList from '../components/examineList'
 import examinePage from '../components/examinePage'
 import otherPage from '../components/otherPage'
+import historyExamineList from '../components/historyExamineList'
+import historyExamineInfo from '../components/historyExamineInfo'
 
 Vue.use(VueRouter)
 
@@ -48,7 +50,6 @@ const routes = [
            },
         ]
       },
-      
       {
         path:'examineList',
         component:examineList
@@ -60,6 +61,14 @@ const routes = [
       {
         path:'otherPage',
         component:otherPage
+      },
+      {
+        path:'historyExamineList',
+        component:historyExamineList
+      },
+      {
+        path:'historyExamineInfo',
+        component:historyExamineInfo
       }
     ]
   }
