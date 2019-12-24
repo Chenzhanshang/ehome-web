@@ -9,13 +9,17 @@
           <el-collapse v-model="activeNames" @change="handleChange">
             <el-collapse-item title="审批信息" name="1">
               <div>审批人：<el-tag>{{leaveAudit.adminName}}</el-tag></div>
-              <div>审批结果：<el-tag :type="leaveAudit.auditState==0?'error':'success'">{{leaveAudit.auditState==0?'未通过':'已通过'}}</el-tag></div>
+              <div>审批结果：<el-tag :type="leaveAudit.auditState==0?'danger':'success'">{{leaveAudit.auditState==0?'未通过':'已通过'}}</el-tag></div>
               <div>审批时间：<el-tag>{{leaveAudit.auditDate |dateFormart}}</el-tag></div>
               <div>审批信息：<el-tag>{{leaveAudit.auditInfo}}</el-tag></div>
             </el-collapse-item>
             <el-collapse-item v-if="leaveAudit.apply!=null" title="申请信息" name="2">
                 <div>申请时间：{{leaveAudit.apply.createTime |dateFormart}}</div>
-                <div>最终结果：<el-tag :type="leaveAudit.apply.applyState==0?'error':'success'">{{leaveAudit.apply.applyState==0?'未通过':'已通过'}}</el-tag></div>
+                <div>最终结果：
+                  <el-tag v-if="leaveAudit.apply.applyState==0" type="warning">进行中</el-tag>
+                  <el-tag v-else-if="leaveAudit.apply.applyState==1" type="success">已通过</el-tag>
+                  <el-tag v-else type="danger">未通过</el-tag>
+                  </div>
                 <div v-if="leaveAudit.apply.owner!=null">
                   业主名：{{leaveAudit.apply.owner.ownerName}}
                 </div>
