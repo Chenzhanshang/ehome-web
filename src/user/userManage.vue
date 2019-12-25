@@ -7,22 +7,33 @@
           <el-input v-model="form.adminAccount" disabled ></el-input>
         </el-form-item>
         <el-form-item label="密码" >
-          <el-input v-model="form.adminPassword"  ></el-input>
+          <el-input v-model="form.adminPassword" placeholder="留空不修改密码" ></el-input>
         </el-form-item>
         <el-form-item label="类型">
-          <el-select v-model="form.adminType" placeholder="请选择账号类型">
+          <el-select v-model="role" placeholder="请选择账号类型">
             <el-option v-for="role in roleList" :key="role.roleId" :label="role.roleName" :value="role.roleId"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="所属地区" >
           <el-cascader
+          v-show="!isAuthority"
           placeholder="试试搜索"
-          :options="options"
+          :options="regions4"
+          filterable
+          :clearable=true
+          @change="selected">
+          </el-cascader>
+
+          <el-cascader
+          v-show="isAuthority"
+          placeholder="试试搜索"
+          :options="regions3"
           filterable
           :clearable=true
           @change="selected">
           </el-cascader>
         </el-form-item>
+          
         <el-form-item>
           <el-button type="primary" @click="openUpdateWindow()">修改</el-button>
           <el-button  @click="dialogFormVisible = false">取消</el-button>
@@ -117,7 +128,9 @@ export default {
                    return item;
                 }
             })
-        }
+        },
+
+
     },
     data(){
         return{
@@ -130,16 +143,20 @@ export default {
           search:'',
           adminId: '',
           dialogVisible: false,
-          //地区数据集合
-          options:[],
+          //是否为房产管理局
+          isAuthority: false,
+          //三级地区数据集合
+          regions3: [],
+           //四级地区数据集合
+          regions4:[],
           //角色列表
           roleList: [],
+          role: '',
           //修改的表单
           form: {
             
             adminAccount: '',
             adminPassword: '',
-            adminType: [],
             region:{
                   regionId:'',
             },
@@ -148,6 +165,18 @@ export default {
 
 
         }
+    },
+
+    //监听选择角色变化
+    watch: {
+      role(value){
+        if(value == 3){
+          this.isAuthority = true
+        }
+        else{
+          this.isAuthority = false
+        }
+      }
     },
 
     //加载管理员信息列表
@@ -166,7 +195,7 @@ export default {
         updateForm(data){
           this.dialogFormVisible = true
           this.form.adminAccount = data.adminAccount
-          this.form.adminType = data.roles[0].roleName
+          this.role = data.roles[0].roleName
           this.form.region.regionId = data.region.regionId
           this.adminId = data.adminId
 
@@ -233,7 +262,7 @@ export default {
             adminAccount: this.form.adminAccount,
             adminPassword: this.form.adminPassword,
             region: {regionId:this.form.region.regionId},
-            roles: [{roleId:this.form.adminType}]
+            roles: [{roleId:this.role}]
           })
           .then((res)=>{
             this.$message({
@@ -262,7 +291,12 @@ export default {
 
         //选择地区监听方法
         selected(e){
+          if(this.role == 3){
+            this.form.region.regionId = e[2]
+          }
+          else{
             this.form.region.regionId = e[3]
+          } 
         },
 
         //监听页数改变
@@ -294,7 +328,8 @@ export default {
       this.axios.get("/admin/regionList")
       .then((res)=>{
         if(res.data.status == 0){
-            this.options = res.data.data.regionList
+            this.regions4 = res.data.data.regionList
+            this.regions3 = res.data.data.regionTreesForThree
         }
         else{
             this.$message({
