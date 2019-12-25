@@ -35,19 +35,19 @@
 
 
       <el-aside width="450px" style="margin-top:40px">
-        <el-form ref="form" :model="form" label-width="80px">
-            <el-form-item label="审批人" style="margin-top:40px">
-                <el-input v-model="form.adminName"></el-input>
+        <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+            <el-form-item label="审批人" prop="adminName" style="margin-top:40px" >
+                <el-input v-model="form.adminName" placeholder="请输入审批人名"></el-input>
             </el-form-item>
 
             <el-form-item label="审批结果" style="margin-top:60px; text-align:center">
                 <el-radio-group v-model="form.auditState">
-                    <el-radio label=1 >通过申请</el-radio>
-                    <el-radio label=0 >拒绝申请</el-radio>
+                    <el-radio label="1" >通过申请</el-radio>
+                    <el-radio label="0" >拒绝申请</el-radio>
                 </el-radio-group>
             </el-form-item>
-            <el-form-item label="审批意见" style="margin-top:60px">
-                <el-input type="textarea" v-model="form.auditInfo"></el-input>
+            <el-form-item label="审批意见" prop="auditInfo" style="margin-top:60px" >
+                <el-input type="textarea" v-model="form.auditInfo" placeholder="请输入审批意见"></el-input>
             </el-form-item>
             <el-form-item style="margin-top:60px; text-align:center">
                 <el-button type="primary" @click="openSubmitWindow()">提交</el-button>
@@ -87,18 +87,22 @@ export default {
                     ownerIdNumber:'',
                     ownerName:''
                 },
-                files:[],
-
-
-               
-
+                files:[],      
             },
             form: {
                 adminName: '',
-                auditState: '',
+                auditState: "1",
                 auditInfo: '',
+                },
 
-                }
+             rules: {
+                adminName: [
+                    {required: true, message: '处理人不能为空', trigger: 'blur'}
+                ],
+                auditInfo: [
+                    {required: true, message: '审批意见不能为空', trigger: 'blur'}
+                ]
+            }
         }
     },
     methods: {
