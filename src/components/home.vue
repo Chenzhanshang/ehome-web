@@ -11,7 +11,7 @@
             
             <el-submenu v-if="show" index="2">
                 <template slot="title">平台工作</template>
-                <el-menu-item index="/home/addCommunity">录入小区</el-menu-item>
+                <el-menu-item index="/home/addCommunity">小区管理</el-menu-item>
                 <el-menu-item index="/home/generateAdminAccount">用户管理</el-menu-item>
             </el-submenu>
             <el-submenu class="right" index="3">

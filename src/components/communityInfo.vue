@@ -123,7 +123,6 @@
           </el-table>
         </el-tab-pane>
         <el-tab-pane label="录入候选人" name=" four">
-
           <el-table
           :data="candidateList"
           style="width: 100%">
@@ -149,6 +148,7 @@
           <el-table-column
             align="right">
             <template slot="header" slot-scope="scope">
+              <el-button type="success" @click="endVote" >结束投票</el-button>
               <el-button type="primary" @click="getunCandidateOwnerList">添加候选人</el-button>
             </template>
             <template slot-scope="scope">
@@ -174,6 +174,17 @@
             <el-button type="primary" @click="addCandidate">确 定</el-button>
           </div>
         </el-dialog>
+        </el-tab-pane>
+        <el-tab-pane label="小区账号" name=" five">
+          <div v-for="item in communityAccount" :key="item.managerId">
+            {{item.type==2?'业委会账号：':'物业帐号：'}}
+            <div class="info">
+              账号：<el-tag>{{item.account}}</el-tag> 
+            </div>
+            <div class="info">
+               密码：<el-tag type="success">{{item.password}}</el-tag>
+            </div>
+          </div>
         </el-tab-pane>
     </el-tabs>
   </main>
@@ -210,10 +221,45 @@ export default {
           roomList:[],
           ownerList:[],
           candidateList:[],
-          value:''
+          value:'',
+          communityAccount:[]
         }
     },
     methods: {
+      //结束投票
+      endVote(){
+        this.$prompt('请输入业委会人员个数，系统将会按照得票数顺位设置业委会成员', '提交后将产生业委会成员', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          inputType:'number',
+          inputErrorMessage: '请输入正整数'
+        }).then(({ value }) => {
+          this.axios.post('/admin/createCommittee/'+this.info.communityId+'/'+value)
+          .then((res)=>{
+            console.log(res)
+            if(res.data.status == 0){
+              this.$message({
+                type: 'success',
+                message: res.data.msg
+              }); 
+              this.getCandidateList(this.info.communityId)
+            }
+          })
+          .catch((res)=>{
+              this.$message({
+                type: 'error',
+                message: res.data.msg
+              }); 
+          })
+
+
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '取消输入'
+          });       
+        });
+      },
       deleteCandidate(index,row){
         this.$confirm('此操作将删除该候选人,若该候选人拥票数则无法删除, 是否继续?', '提示', {
           confirmButtonText: '确定',
@@ -584,6 +630,18 @@ export default {
             })
           })
 
+        },
+        getCommunityAccount(communityId){
+          this.axios.get('/admin/getCommunityAccount/'+communityId)
+          .then((res)=>{
+            console.log(res)
+              if(res.data.status == 0){
+                this.communityAccount = res.data.data.communityAccount
+              }
+          })
+          .catch((res)=>{
+
+          })
         }
     },
     created() {
@@ -592,6 +650,7 @@ export default {
         this.getHouse(this.info.communityId)
         this.getRoom(this.info.communityId)
         this.getCandidateList(this.info.communityId)
+        this.getCommunityAccount(this.info.communityId)
     },
 }
 </script>
@@ -610,5 +669,8 @@ export default {
 
   .box-card {
     width: 480px;
+  }
+  .info{
+    margin: 10px
   }
 </style>
