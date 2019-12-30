@@ -38,6 +38,21 @@
             <el-form-item label="审批意见" prop="auditInfo" style="margin-top:60px">
                 <el-input type="textarea" v-model="form.auditInfo" placeholder="请输入审批意见"></el-input>
             </el-form-item>
+            <el-form-item label="上传文件" >
+            <el-upload
+            :action="'http://localhost:8081/ehome/uploadExamine/'"
+            name="multipartFile" 
+            :auto-upload=false
+            :on-preview="handlePreview"
+            :on-remove="handleRemove"
+            :before-remove="beforeRemove"
+            :limit="1"
+            ref="upload"
+            :on-exceed="handleExceed"
+            :file-list="fileList">
+            <el-button size="small" type="primary">选择文件</el-button>
+          </el-upload>   
+          </el-form-item>
             <el-form-item style="margin-top:60px; text-align:center">
                 <el-button type="primary" @click="openSubmitWindow()">提交</el-button>
             </el-form-item>
@@ -136,6 +151,8 @@ export default {
 
         onSubmit(){
             console.log(this.form)
+            //保存上传文件
+            this.$refs.upload.submit()
             this.axios.post("/audit/dispose",{
                 adminName: this.form.adminName,
                 auditState: this.form.auditState,
@@ -168,7 +185,11 @@ export default {
           }).catch(() => {  
 
           })
-        }
+        },
+
+        handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 1 个文件，已选择了 ${files.length} 个文件`);
+      },
     },
     created() {
         //取出缓存中的appid

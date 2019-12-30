@@ -12,6 +12,7 @@
               <div>审批结果：<el-tag :type="leaveAudit.auditState==0?'danger':'success'">{{leaveAudit.auditState==0?'未通过':'已通过'}}</el-tag></div>
               <div>审批时间：<el-tag>{{leaveAudit.auditDate |dateFormart}}</el-tag></div>
               <div>审批信息：<el-tag>{{leaveAudit.auditInfo}}</el-tag></div>
+              <div v-if="hasFile()">文件列表: {{leaveAudit.fileName}}<el-button size="mini" @click="download(leaveAudit.fileName,leaveAudit.filePath)">下载</el-button></div>
             </el-collapse-item>
             <el-collapse-item v-if="leaveAudit.apply!=null" title="申请信息" name="2">
                 <div>申请时间：{{leaveAudit.apply.createTime |dateFormart}}</div>
@@ -55,6 +56,8 @@ export default {
         auditState:'',
         auditDate:'',
         auditInfo:'',
+        fileName: '',
+        filePath: '',
         apply:{
           applyId:'',
           createTime:'',
@@ -103,9 +106,55 @@ export default {
         })
 
     },
+
+    download(fileName,filePath){
+      console.log(filePath)
+        this.axios.post('admin/download/',{filePath:filePath},{
+            responseType: 'blob'
+        })
+        .then((res)=>{
+            console.log(res)
+              if (window.navigator.msSaveBlob) {
+                try {
+                const blobObject = new Blob([res.data]);
+                window.navigator.msSaveBlob(blobObject,fileName);
+                } catch (e) {
+                console.log(e);
+                }
+            } else {
+                const blob = res.data;
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = (e) => {
+                const a = document.createElement('a');
+                a.download = fileName;
+                a.href = e.target.result;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                }
+            }
+
+        })
+        .catch((res)=>{
+            console.log(res)
+        })
+
+    },
+
     handleChange(val) {
         console.log(val);
       },
+
+    hasFile(){
+      if(this.leaveAudit.fileName != null && this.leaveAudit.filePath != null){
+        return true
+      }
+      else{
+        return false  
+      }
+    },
+
     goBack() {
         console.log('go back');
         this.$router.go(-1);
