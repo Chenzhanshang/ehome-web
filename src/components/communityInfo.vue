@@ -175,7 +175,10 @@
           </div>
         </el-dialog>
         </el-tab-pane>
-        <el-tab-pane label="小区账号" name=" five">
+        <el-tab-pane label="业委会信息" name=" five">
+           <boardMember></boardMember>
+         </el-tab-pane>
+        <el-tab-pane label="小区账号" name="six" >
           <div v-for="item in communityAccount" :key="item.managerId">
             {{item.type==2?'业委会账号：':'物业帐号：'}}
             <div class="info">
@@ -186,13 +189,19 @@
             </div>
           </div>
         </el-tab-pane>
+         
     </el-tabs>
   </main>
   </el-container>
 </template>
 
 <script>
+import boardMember from './boardMember'
+
 export default {
+  components:{
+    'boardMember':boardMember
+  },
   computed:{
     showHouseList:function(){
       return this.houseList.filter((item)=>{
