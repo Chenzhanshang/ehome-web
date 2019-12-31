@@ -17,6 +17,7 @@
             <el-submenu class="right" index="3">
                 <template slot="title">{{region}}:{{roles[0].roleName}}</template>
                 <el-menu-item @click="updatePassword">修改密码</el-menu-item>
+                <el-menu-item @click="safeExit">安全退出</el-menu-item>
             </el-submenu>
             </el-menu>
         </el-header>
@@ -38,6 +39,24 @@ export default {
         }
     },
     methods: {
+        safeExit(){
+            this.axios.get('/admin/logout')
+            .then((res)=>{
+                if(res.data.status == 0){
+                    this.$message({
+                        type:'success',
+                        message:res.data.msg
+                    })
+                    this.$router.push({path:'/'})
+                }
+            })
+            .catch((res)=>[
+                this.$message({
+                        type:'warning',
+                        message:"安全退出失败"
+                    })
+            ])
+        },
         handleSelect(key, keyPath) {
             console.log(key, keyPath);
         },
