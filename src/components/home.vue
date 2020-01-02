@@ -42,13 +42,14 @@ export default {
         safeExit(){
             this.axios.get('/admin/logout')
             .then((res)=>{
+                console.log(res)
                 if(res.data.status == 0){
                     this.$message({
                         type:'success',
                         message:res.data.msg
                     })
-                    this.$router.push({path:'/'})
                 }
+                this.$router.push({path:'/'})
             })
             .catch((res)=>[
                 this.$message({
