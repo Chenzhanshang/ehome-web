@@ -175,8 +175,12 @@ export default {
     created() {
         //获取审批列表
         this.getExamineList()
-        
     },
+    // mounted() {
+    //     //获取审批列表
+    //     this.getExamineList()
+    // },
+
 }
 </script>
 

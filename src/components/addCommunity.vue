@@ -529,28 +529,38 @@ export default {
         },
         //加载地区信息
         loadRegion(){
-            this.axios.get("/admin/regionList")
-            .then((res)=>{
-                if(res.data.status == 0){
-                    this.options = res.data.data.regionList
+           if(localStorage.getItem("regionList"))
+           {
+               this.options = JSON.parse(localStorage.getItem("regionList"))
+           }
+           else{
+               this.axios.get("/admin/regionList")
+                .then((res)=>{
+                    console.log(res)
+                    if(res.data.status == 0){
+                        this.options = res.data.data.regionList
+                        localStorage.setItem("regionList",JSON.stringify(res.data.data.regionList));
+                        this.$message({
+                            type:'success',
+                            message:res.data.msg
+                        });
+                    }
+                    else{
+                        this.$message({
+                            type:'error',
+                            message:res.data.msg
+                        });
+                    }
+                })
+                .catch((res)=>{
                     this.$message({
-                        type:'success',
-                        message:res.data.msg
-                    });
-                }
-                else{
-                    this.$message({
-                        type:'error',
-                        message:res.data.msg
-                    });
-                }
-            })
-            .catch((res)=>{
-                this.$message({
-                        type:'warning',
-                        message:"请求加载地区信息失败"
-                    });
-            })
+                            type:'warning',
+                            message:"请求加载地区信息失败"
+                        });
+                })
+           }
+            
+            
         },
         //加载小区列表
         loadCommunityList(){
