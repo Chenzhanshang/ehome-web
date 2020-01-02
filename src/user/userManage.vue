@@ -205,18 +205,26 @@ export default {
         deleteAdmin(data){
           this.axios.get("/admin/deleteAdmin/" + data.adminId)
           .then((res)=>{
-
-            //删除前端数据 
-            this.adminList.forEach((admin,index) => {
-              if(admin.adminId == data.adminId){
-                //删除索引后的一个元素
-                this.adminList.splice(index,1)
-              }
-            });
-            this.$message({
-              type: 'success',
-              message:res.data.msg
-            });
+            if(res.data.status == 1){
+               //删除前端数据 
+              this.adminList.forEach((admin,index) => {
+                if(admin.adminId == data.adminId){
+                  //删除索引后的一个元素
+                  this.adminList.splice(index,1)
+                }
+              });
+              this.$message({
+                type: 'success',
+                message:res.data.msg
+              });
+            }
+            else{
+              this.$message({
+                type: 'error',
+                message:res.data.msg
+              });
+            }
+           
 
           })
           .catch((res)=>{

@@ -153,6 +153,7 @@ export default {
                 type: 'success',
                 message:res.data.msg
                 });
+                this.$router.push({path:'/home/examineList'})
             })
             .catch((res)=>{
                 this.$message({
@@ -170,8 +171,7 @@ export default {
             type: 'warning'
           }).then(() => {
             this.onSubmit()
-            this.$router.push({path:'/home/examineList'})
-
+        
           }).catch(() => {  
 
           })
