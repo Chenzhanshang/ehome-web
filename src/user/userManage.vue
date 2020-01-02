@@ -325,21 +325,32 @@ export default {
       })
 
       //页面加载调用方法
-      this.axios.get("/admin/regionList")
-      .then((res)=>{
-        if(res.data.status == 0){
-            this.regions4 = res.data.data.regionList
-            this.regions3 = res.data.data.regionTreesForThree
-        }
-        else{
-            this.$message({
-                message:res.data.msg
-            });
-        } 
-      })
-      .catch((res)=>{
-          console.log(res);
-      })
+      if(localStorage.getItem("regionList")&&localStorage.getItem("regionTreesForThree"))
+      {
+          this.regions4 = JSON.parse(localStorage.getItem("regionList"))
+          this.regions3 = JSON.parse(localStorage.getItem("regionTreesForThree"))
+
+      }
+      else{
+          this.axios.get("/admin/regionList")
+          .then((res)=>{
+              console.log(res);
+              if(res.data.status == 0){
+                  this.regions4 = res.data.data.regionList
+                  this.regions3 = res.data.data.regionTreesForThree
+                  localStorage.setItem("regionList",JSON.stringify(res.data.data.regionList))
+                  localStorage.setItem("regionTreesForThree",JSON.stringify(res.data.data.regionTreesForThree))
+              }
+              else{
+                  this.$message({
+                      message:res.data.msg
+                  });
+              } 
+          })
+          .catch((res)=>{
+              console.log(res);
+          })
+      }
     },
 }
 </script>
