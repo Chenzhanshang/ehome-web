@@ -10,7 +10,7 @@ Vue.use(ElementUI)
 import axios from 'axios'
 import VueAxios from 'vue-axios'
 //设置全局访问路径
-axios.defaults.baseURL= 'http://localhost:8081/ehome'
+axios.defaults.baseURL= 'https://www.tech4flag.com/ehome'
 //访问携带cookie
 axios.defaults.withCredentials = true
 Vue.use(VueAxios,axios)
