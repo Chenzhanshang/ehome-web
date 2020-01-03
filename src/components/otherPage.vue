@@ -40,14 +40,16 @@
             </el-form-item>
             <el-form-item label="上传文件" >
             <el-upload
-            :action="'http://localhost:8081/ehome/uploadExamine/'"
+            :action="'https://www.tech4flag.com/ehome/uploadExamine'"
             name="multipartFile" 
             :auto-upload=false
             :on-preview="handlePreview"
             :on-remove="handleRemove"
             :before-remove="beforeRemove"
+            :on-success="uploadSuccess"
             :limit="1"
             ref="upload"
+            :on-change="uploadChange"
             :on-exceed="handleExceed"
             :file-list="fileList">
             <el-button size="small" type="primary">选择文件</el-button>
@@ -97,6 +99,7 @@ export default {
                
 
             },
+            fileLength:0,
             form: {
                 adminName: '',
                 auditState: "1",
@@ -114,6 +117,27 @@ export default {
         }
     },
     methods: {
+        uploadSuccess(response, file, fileList){
+            this.fileLength = 0
+            this.axios.post("/audit/dispose",{
+                adminName: this.form.adminName,
+                auditState: this.form.auditState,
+                auditInfo: this.form.auditInfo,
+                applyId: this.applyId
+            }).then((res)=>{
+                this.$message({
+                type: 'success',
+                message:res.data.msg
+                });
+                this.$router.push({path:'/home/examineList'})
+            })
+            .catch((res)=>{
+                this.$message({
+                    type: 'eroor',
+                    message:res.data.msg
+                })   
+            })
+        },
         downloadFile(fileId,fileName){
             console.log(fileId)
             this.axios.post('admin/downloadFile/',{fileId:fileId},{
@@ -152,25 +176,30 @@ export default {
         onSubmit(){
             console.log(this.form)
             //保存上传文件
-            this.$refs.upload.submit()
-            this.axios.post("/audit/dispose",{
-                adminName: this.form.adminName,
-                auditState: this.form.auditState,
-                auditInfo: this.form.auditInfo,
-                applyId: this.applyId
-            }).then((res)=>{
-                this.$message({
-                type: 'success',
-                message:res.data.msg
-                });
-                this.$router.push({path:'/home/examineList'})
-            })
-            .catch((res)=>{
-                this.$message({
-                    type: 'eroor',
+            if(this.fileLength > 0){
+                this.$refs.upload.submit()
+            }
+            else{
+                this.axios.post("/audit/dispose",{
+                    adminName: this.form.adminName,
+                    auditState: this.form.auditState,
+                    auditInfo: this.form.auditInfo,
+                    applyId: this.applyId
+                }).then((res)=>{
+                    this.$message({
+                    type: 'success',
                     message:res.data.msg
-                })   
-            })
+                    });
+                    this.$router.push({path:'/home/examineList'})
+                })
+                .catch((res)=>{
+                    this.$message({
+                        type: 'eroor',
+                        message:res.data.msg
+                    })   
+                })
+            }
+            
         },
 
         //提交处理对话框
@@ -187,8 +216,16 @@ export default {
 
           })
         },
-
+        uploadChange(file, fileList){
+            this.fileLength++
+            console.log(this.fileLength)
+        },
+        handleRemove(file, fileList){
+             this.fileLength--
+            console.log(this.fileLength)
+        },
         handleExceed(files, fileList) {
+            
         this.$message.warning(`当前限制选择 1 个文件，已选择了 ${files.length} 个文件`);
       },
     },
