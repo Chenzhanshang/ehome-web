@@ -205,7 +205,7 @@ export default {
         deleteAdmin(data){
           this.axios.get("/admin/deleteAdmin/" + data.adminId)
           .then((res)=>{
-            if(res.data.status == 1){
+            if(res.data.status == 0){
                //删除前端数据 
               this.adminList.forEach((admin,index) => {
                 if(admin.adminId == data.adminId){
